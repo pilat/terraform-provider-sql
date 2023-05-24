@@ -1,0 +1,9 @@
+.vscode/
+
+terraform.tfplan
+terraform.tfstate
+./*.tfstate
+*.terraform.lock.hcl
+.terraform/
+*.backup
+tfplugindocs
