@@ -56,9 +56,6 @@ func resourceSQLRead(d *schema.ResourceData, meta any) error {
 }
 
 func resourceSQLUpdate(d *schema.ResourceData, meta any) error {
-	if d.HasChange("database") || d.HasChange("up") {
-		return fmt.Errorf("changing any attribute of an existing SQL resource is not allowed")
-	}
 	return nil
 }
 

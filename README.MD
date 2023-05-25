@@ -17,7 +17,7 @@ terraform {
   required_providers {
     sql = {
       source = "pilat/sql"
-      version = "0.0.5"
+      version = "0.0.6"
     }
   }
 }
