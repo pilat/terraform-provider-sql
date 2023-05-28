@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"context"
 	"log"
 	"net/url"
 	"regexp"
@@ -41,7 +42,7 @@ func getDSN(dsn, dbName string) string {
 	return strings.Join(parts, " ")
 }
 
-func runSQL(conf *Config, dbName, sql string) error {
+func runSQL(ctx context.Context, conf *Config, dbName, sql string) error {
 	db, err := sqlDB.Open("postgres", getDSN(conf.DSN, dbName))
 	if err != nil {
 		return err
@@ -50,8 +51,7 @@ func runSQL(conf *Config, dbName, sql string) error {
 
 	db.SetConnMaxLifetime(time.Duration(conf.Timeout) * time.Second)
 
-	err = db.Ping()
-	if err != nil {
+	if err = db.PingContext(ctx); err != nil {
 		return err
 	}
 
@@ -62,8 +62,7 @@ func runSQL(conf *Config, dbName, sql string) error {
 			continue
 		}
 
-		_, err = db.Exec(command)
-		if err != nil {
+		if _, err = db.ExecContext(ctx, command); err != nil {
 			return err
 		}
 	}

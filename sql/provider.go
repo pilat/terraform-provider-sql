@@ -12,6 +12,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SQL_DSN", nil),
 				Description: "The data source name (DSN) for connecting to the database.",
+				Sensitive:   true,
 			},
 			"timeout": {
 				Type:        schema.TypeInt,

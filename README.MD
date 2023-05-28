@@ -4,8 +4,8 @@ The SQL Terraform Provider allows you to manage SQL operations within Terraform.
 ```hcl
 resource "sql" "task" {
     database = "app_db"
-    up = "CREATE TABLE users (id SERIAL PRIMARY KEY, name text NOT NULL)"
-    down = "DROP TABLE users"
+    up = "CREATE ROLE owner WITH LOGIN VALID UNTIL 'infinity'"
+    down = "DROP ROLE owner"
 }
 ```
 
@@ -32,7 +32,7 @@ terraform {
   required_providers {
     sql = {
       source = "pilat/sql"
-      version = "0.0.6"
+      version = "0.0.7"
     }
   }
 }
@@ -46,8 +46,8 @@ Then, use the provider in your Terraform files:
 ```hcl
 resource "sql" "migration_1" {
     database = "postgres"
-    up = "CREATE ROLE test_role WITH LOGIN VALID UNTIL 'infinity';"
-    down = "DROP ROLE test_role;"
+    up = "CREATE ROLE test_role WITH LOGIN VALID UNTIL 'infinity'"
+    down = "DROP ROLE test_role"
 }
 
 resource "sql" "migration_2" {
@@ -58,7 +58,7 @@ resource "sql" "migration_2" {
         CREATE DATABASE test_db OWNER test_role;
         REVOKE test_role FROM CURRENT_USER;
     EOF
-    down = "DROP DATABASE test_db;"
+    down = "DROP DATABASE test_db"
 }
 
 resource "sql" "migration_3" {
