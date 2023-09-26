@@ -3,6 +3,7 @@ package sql
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -45,6 +46,9 @@ func resourceSQL() *schema.Resource {
 				Optional:    true,
 				Description: "The SQL command to run when migrating down.",
 			},
+		},
+		Importer: &schema.ResourceImporter{
+			StateContext: customImporter,
 		},
 	}
 }
@@ -98,4 +102,26 @@ func resourceSQLDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	d.SetId("")
 
 	return nil
+}
+
+func customImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
+	type dataStruct struct {
+		Database string `json:"database"`
+		Up       string `json:"up"`
+		Down     string `json:"down"`
+	}
+
+	var data dataStruct
+	if err := json.Unmarshal([]byte(d.Id()), &data); err != nil {
+		return nil, err
+	}
+
+	d.Set("database", data.Database)
+	d.Set("up", data.Up)
+	d.Set("down", data.Down)
+
+	id := fmt.Sprintf("%x", sha256.Sum256([]byte(data.Up)))
+	d.SetId(id[:8])
+
+	return []*schema.ResourceData{d}, nil
 }
