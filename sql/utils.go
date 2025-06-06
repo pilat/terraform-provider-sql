@@ -13,6 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var openDB = sqlDB.Open
+
 func getDSN(dsn, dbName string) string {
 	if strings.HasPrefix(dsn, "postgresql://") {
 		parsedURL, err := url.Parse(dsn)
@@ -43,7 +45,7 @@ func getDSN(dsn, dbName string) string {
 }
 
 func runSQL(ctx context.Context, conf *Config, dbName, sql string) error {
-	db, err := sqlDB.Open("postgres", getDSN(conf.DSN, dbName))
+	db, err := openDB("postgres", getDSN(conf.DSN, dbName))
 	if err != nil {
 		return err
 	}
