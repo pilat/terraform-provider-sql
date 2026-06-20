@@ -1,0 +1,32 @@
+---
+page_title: "{{.RenderedProviderName}} Provider"
+description: |-
+  Runs an up SQL script on create and a down SQL script on destroy, for managing
+  PostgreSQL database-level objects (databases, roles, schemas, grants) alongside
+  the rest of your infrastructure.
+---
+
+# {{.RenderedProviderName}} Provider
+
+The `sql` provider exposes a single `sql` resource that runs an `up` SQL script when
+the resource is created and a `down` SQL script when it is destroyed. It is meant for
+managing database-level entities — databases, roles, schemas, grants — next to the rest
+of your infrastructure, **not** as a general-purpose schema migration tool.
+
+PostgreSQL only. The driver is hardcoded to `postgres` (`lib/pq`); this is by design,
+not a temporary limitation.
+
+~> **This is not a typical "managed object" provider.** It does not reconcile drift, `up`
+is immutable once created, and updates never touch the database. Read the
+[`sql` resource](resources/sql.md#resource-behavior) behavior section before wiring it into anything.
+
+## Example Usage
+
+{{ tffile "examples/provider/provider.tf" }}
+
+The `dsn` accepts both the URL form (`postgresql://user:pass@host/db?sslmode=disable`)
+and the keyword form (`user=foo password=bar host=localhost dbname=baz sslmode=disable`).
+The database part of the DSN is rewritten for every operation using the resource's
+`database` attribute, so whatever database the DSN points at only acts as a default.
+
+{{ .SchemaMarkdown | trimspace }}

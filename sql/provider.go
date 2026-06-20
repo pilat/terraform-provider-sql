@@ -18,7 +18,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SQL_TIMEOUT", 600),
-				Description: "The maximum amount of time (in seconds) to wait for a connection, zero means wait indefinitely.",
+				Description: "The maximum amount of time (in seconds) a database connection may be reused; zero means connections are reused forever.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

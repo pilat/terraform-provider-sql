@@ -1,7 +1,8 @@
-.PHONY: test test-e2e fmt clean
+.PHONY: test test-e2e fmt clean docs
 
 DSN ?= postgresql://docker:docker@localhost:35432/postgres?sslmode=disable
 COMPOSE := docker compose -f e2e/docker-compose.yaml
+TFPLUGINDOCS_VERSION ?= v0.25.0
 
 test:
 	@echo "===> unit tests"
@@ -15,6 +16,10 @@ test-e2e:
 	$(COMPOSE) up -d --wait --wait-timeout 60 && \
 	echo "===> acceptance tests ($$tfbin)" && \
 	env TF_ACC=1 TF_ACC_TERRAFORM_PATH="$$tfbin" SQL_DSN='$(DSN)' $$tofuenv go test -count=1 ./e2e/...
+
+docs:
+	@echo "===> generating registry docs"
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@$(TFPLUGINDOCS_VERSION) generate --provider-name sql
 
 fmt:
 	@echo "===> gofmt"
