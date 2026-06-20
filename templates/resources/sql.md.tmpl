@@ -1,0 +1,55 @@
+---
+page_title: "sql Resource - terraform-provider-sql"
+description: |-
+  Runs an up SQL script on create and a down SQL script on destroy.
+---
+
+# sql (Resource)
+
+Runs the `up` SQL script when the resource is created and the optional `down` SQL script
+when it is destroyed. Use it for database-level objects — databases, roles, schemas,
+grants — not as a migration framework.
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+The `depends_on` directive enforces execution order. Without it, blocks execute in parallel.
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Resource Behavior
+
+This resource does not behave like a typical "managed object" provider. Read this before
+you rely on it.
+
+* **`up` is immutable.** Once the resource exists, changing `up` is rejected at plan time
+  (`changing the up attribute is not allowed after the resource has been created`) — the plan
+  hard-fails, the resource is **not** replaced automatically. To change the script, destroy
+  and recreate the resource (remove it from the configuration and add a new one).
+* **`up`/`down` run statement by statement.** Multi-statement scripts are split on a
+  semicolon followed by a newline (`;\n` or `;\r\n`) and each statement is executed
+  separately, with **no wrapping transaction**. That is deliberate — it lets statements
+  such as `CREATE DATABASE`, which PostgreSQL refuses to run inside a transaction block,
+  succeed.
+* **Read is a no-op.** The provider never reads the database back, so it does not detect
+  drift or out-of-band changes. If someone drops your role by hand, Terraform won't notice.
+* **Update runs no SQL.** You may edit `database` or `down` on an existing resource; that
+  updates Terraform state and emits a warning, but it does **not** touch the database. The
+  purpose is to let you correct a wrong `down`/`database` before destroying, so the right
+  `down` runs at destroy time.
+* **Resource ID** is the first 8 hex characters of `sha256(up)`.
+
+## Import
+
+Import takes a JSON object as the id. The `database`, `up`, and `down` values must match
+your configuration; the real id is recomputed as `sha256(up)[:8]` during import.
+
+{{ codefile "shell" .ImportFile }}
+
+## A word of caution
+
+This resource runs whatever SQL you hand it. There is no sandbox and no migration framework
+underneath — your `up`/`down` scripts are executed as-is. Read the SQL before you apply, and
+keep in mind that a careless `terraform apply` can do real damage when the statements touch
+roles, grants, or whole databases.
